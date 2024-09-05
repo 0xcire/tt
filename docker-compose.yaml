@@ -1,0 +1,78 @@
+version: "3.9"
+
+services:
+  caddy:
+    image: caddy:latest
+    container_name: "tt_caddy"
+    hostname: "tt_caddy"
+    restart: unless-stopped
+    networks:
+      - tt
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./site:/srv
+      - caddy_data:/data
+      - caddy_config:/config
+  db:
+    image: postgres:15
+    container_name: "tt_db"
+    hostname: "tt_db"
+    restart: always
+    environment:
+      POSTGRES_DB: ${tt_DB_NAME}
+      POSTGRES_USER: ${tt_DB_USER}
+      POSTGRES_PASSWORD: ${tt_DB_PASSWORD}
+      PGPASSWORD: ${tt_DB_PASSWORD}
+    networks:
+      - tt
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${TT_PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${TT_PGADMIN_PASSWORD}
+    ports:
+      - "${TT_PGADMIN_EXTERNAL_PORT}:80"
+    networks:
+      - tt
+    depends_on:
+      - postgres
+  redis:
+    image: redis:6.2
+    container_name: tt_redis
+    hostname: tt_redis
+    networks:
+      - tt
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+  mailcrab:
+    image: marlonb/mailcrab:latest
+    environment:
+      MAILCRAB_RETENTION_PERIOD: 86400
+      MAILCRAB_PREFIX: tt-test
+      ENABLE_TLS_AUTH: true
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    networks:
+      - tt
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  tt:
+    driver: bridge
