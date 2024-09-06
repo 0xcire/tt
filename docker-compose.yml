@@ -60,6 +60,15 @@ services:
       interval: 1s
       timeout: 3s
       retries: 5
+  curity:
+    image: curity.azurecr.io/curity/idsvr
+    container_name: tt_curity
+    hostname: tt_curity
+    ports:
+      - 6749:6749
+      - 8443:8443
+    environment:
+      CURITY_ADMIN_PASSWORD: ${CURITY_ADMIN_PASSWORD}
   mailcrab:
     image: marlonb/mailcrab:latest
     container_name: tt_mailcrab
