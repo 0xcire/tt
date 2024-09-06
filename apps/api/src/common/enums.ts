@@ -1,0 +1,7 @@
+export enum ENV {
+  TT_DB_USER = 'TT_DB_USER',
+  TT_DB_PASSWORD = 'TT_DB_PASSWORD',
+  TT_DB_NAME = 'TT_DB_NAME',
+  TT_DB_HOST = 'TT_DB_HOST',
+  TT_DB_PORT = 'TT_DB_PORT',
+}

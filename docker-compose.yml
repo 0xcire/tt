@@ -3,14 +3,15 @@ version: "3.9"
 services:
   caddy:
     image: caddy:latest
-    container_name: "tt_caddy"
-    hostname: "tt_caddy"
+    container_name: tt_caddy
+    hostname: tt_caddy
     restart: unless-stopped
     networks:
       - tt
     ports:
       - "80:80"
       - "443:443"
+      - "443:443/udp"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./site:/srv
@@ -18,14 +19,14 @@ services:
       - caddy_config:/config
   db:
     image: postgres:15
-    container_name: "tt_db"
-    hostname: "tt_db"
+    container_name: tt_db
+    hostname: tt_db
     restart: always
     environment:
-      POSTGRES_DB: ${tt_DB_NAME}
-      POSTGRES_USER: ${tt_DB_USER}
-      POSTGRES_PASSWORD: ${tt_DB_PASSWORD}
-      PGPASSWORD: ${tt_DB_PASSWORD}
+      POSTGRES_DB: ${TT_DB_NAME}
+      POSTGRES_USER: ${TT_DB_USER}
+      POSTGRES_PASSWORD: ${TT_DB_PASSWORD}
+      PGPASSWORD: ${TT_DB_PASSWORD}
     networks:
       - tt
     healthcheck:
@@ -49,6 +50,8 @@ services:
     image: redis:6.2
     container_name: tt_redis
     hostname: tt_redis
+    ports:
+      - 6379:6379
     networks:
       - tt
     restart: always
@@ -59,6 +62,9 @@ services:
       retries: 5
   mailcrab:
     image: marlonb/mailcrab:latest
+    container_name: tt_mailcrab
+    hostname: tt_mailcrab
+    profiles: ['mailcrab', 'tt']
     environment:
       MAILCRAB_RETENTION_PERIOD: 86400
       MAILCRAB_PREFIX: tt-test
@@ -68,6 +74,21 @@ services:
       - "1025:1025"
     networks:
       - tt
+  server:
+    image: server-prod
+    container_name: server-prod
+    build:
+      context: ../
+      dockerfile: ./apps/server/Dockerfile
+  client:
+    image: client-dev
+    container_name: client-dev
+    build:
+      context: ../
+      dockerfile: ./apps/client/Dockerfile.dev
+    volumes:
+      - ../:/app
+      - /app/node_modules
 
 volumes:
   caddy_data:

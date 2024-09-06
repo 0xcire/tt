@@ -8,7 +8,8 @@ A monorepo SaaS template set up for the following:
 
 ## Features
 
-- attempt to build a repo config builder cli in Rust
+- attempt to build a repo config builder cli in Go/Zig/Rust
+- 
 
 ## Tech
 
@@ -54,4 +55,4 @@ You'll then be able to bring up the entire application stack,
 
 ## Deploying
 
-I recommend a $4 [Digital Ocean Droplet](https://www.digitalocean.com/pricing/droplets)
+I recommend a $4 [Digital Ocean Droplet](https://www.digitalocean.com/pricing/droplets) and running the scripts in numerical order in `./deploy-scripts`
